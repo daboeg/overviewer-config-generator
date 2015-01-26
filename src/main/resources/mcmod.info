@@ -1,0 +1,18 @@
+[
+{
+  "modid": "overworld-config-generator",
+  "name": "Overworld config generator",
+  "description": "Generates Overworld configuration files for your world",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authors": [
+    "daboeg"
+  ],
+  "credits": "Authored by daboeg",
+  "logoFile": "",
+  "screenshots": [ ],
+  "dependencies": []
+}
+]
