@@ -116,7 +116,7 @@ public class OverviewerConfigGeneratorMod {
 			break;
 		case -1: // nether
 			if (enableSmoothLighting) {
-				world.put("rendermode", "nether_lighting_smooth");
+				world.put("rendermode", "nether_smooth_lighting");
 			} else {
 				world.put("rendermode", "nether_lighting");
 			}
