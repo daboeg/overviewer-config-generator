@@ -21,6 +21,8 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.network.NetworkCheckHandler;
+import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = ModInfo.ID, name = ModInfo.NAME, version = ModInfo.VER)
 public class OverviewerConfigGeneratorMod {
@@ -33,7 +35,7 @@ public class OverviewerConfigGeneratorMod {
 	private static Boolean enableNightRender;
 	private static File worldFolder;
 	private static String worldName;
-
+	
 	// The instance of your mod that Forge uses.
 	@Instance(ModInfo.ID)
 	public static OverviewerConfigGeneratorMod instance;
@@ -86,8 +88,22 @@ public class OverviewerConfigGeneratorMod {
 		public void onEvent(Save event) {
 			worldFolder = event.world.getSaveHandler().getWorldDirectory();
 			worldName = event.world.getWorldInfo().getWorldName();
-			processWorld(event.world.provider);
-			
+
+			// overworld -- always provide map
+			if (event.world.provider.dimensionId == 0) {
+				processWorld(event.world.provider);
+			} else {
+				// all other worlds, test for region folder
+				File region = new File(new File(worldFolder,
+						event.world.provider.getSaveFolder()), "region");
+				log.info("world {} region folder is {}",
+						event.world.provider.getSaveFolder(),
+						region.getAbsolutePath());
+				if (region.exists()) {
+					processWorld(event.world.provider);
+				}
+			}
+
 			try {
 				writeConfig();
 			} catch (IOException e) {
@@ -96,6 +112,11 @@ public class OverviewerConfigGeneratorMod {
 		}
 	}
 
+    @NetworkCheckHandler
+    public boolean netCheckHandler(Map<String, String> mods, Side side) {
+        return true;
+    }
+	
 	/**
 	 * Process the provided world.provider into our world map.
 	 * 
@@ -216,8 +237,8 @@ public class OverviewerConfigGeneratorMod {
 		PrintWriter out = new PrintWriter(file);
 
 		// write out our world configuration
-		out.println(String
-				.format("worlds['%s'] = '%s'", worldName, worldFolder.getAbsolutePath()));
+		out.println(String.format("worlds['%s'] = '%s'", worldName,
+				worldFolder.getAbsolutePath()));
 		out.println();
 		for (String world : worlds.keySet()) {
 			out.println(String.format("renders['%s'] = %s", world,
